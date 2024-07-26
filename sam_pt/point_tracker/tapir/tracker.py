@@ -1,7 +1,9 @@
 import numpy as np
-import tensorflow as tf
 import torch
 from torch.nn import functional as F
+import haiku as hk
+import jax
+from . import tapir_model
 
 from sam_pt.point_tracker import PointTracker
 
@@ -14,10 +16,6 @@ class TapirPointTracker(PointTracker):
     def __init__(self, checkpoint_path, visibility_threshold):
         from .configs.tapir_config import get_config
         super().__init__()
-
-        # Keep TF off the GPU; otherwise it hogs all the memory and leaves none for JAX
-        tf.config.experimental.set_visible_devices([], 'GPU')
-        tf.config.experimental.set_visible_devices([], 'TPU')
 
         # # v1: use the last GPU
         # # Hardcode JAX to use the last GPU (the first is reserved for other modules from PyTorch)
@@ -37,9 +35,7 @@ class TapirPointTracker(PointTracker):
         self.jitted_forward = self._create_jitted_forward()
 
     def _create_jitted_forward(self):
-        import haiku as hk
-        import jax
-        from . import tapir_model
+        
 
         checkpoint = np.load(self.checkpoint_path, allow_pickle=True).item()
         params, state = checkpoint["params"], checkpoint["state"]

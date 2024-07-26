@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 import torch
 from torch.nn import functional as F
 
@@ -14,9 +13,6 @@ class TapnetPointTracker(PointTracker):
         from .configs.tapnet_config import get_config
         super().__init__()
 
-        # Keep TF off the GPU; otherwise it hogs all the memory and leaves none for JAX
-        tf.config.experimental.set_visible_devices([], 'GPU')
-        tf.config.experimental.set_visible_devices([], 'TPU')
 
         # # v1: use the last GPU
         # # Hardcode JAX to use the last GPU (the first is reserved for other modules from PyTorch)
